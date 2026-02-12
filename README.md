@@ -1,6 +1,8 @@
 ## LaMa to CoreML converter
 
-This repo contains a python script for converting [LaMa](https://github.com/advimman/lama/) pretrained models (.ckpt files) to Apple's Core ML model format. Pretrained models can be downloaded at [Google Drive](https://drive.google.com/drive/folders/1B2x7eQDgecTL0oh3LSIBDGj0fTxs6Ips) (link is taken from the official LaMa repo). Use *LaMa_models.zip* for big-lama, lama-places, lama-celeba, etc. *big-lama.zip* if you need to convert big-lama only.
+This repo contains a python script for converting [LaMa](https://github.com/advimman/lama/) pretrained models (.ckpt files) to Apple's Core ML model format. Pretrained models can be downloaded at [Google Drive](https://drive.google.com/drive/folders/1B2x7eQDgecTL0oh3LSIBDGj0fTxs6Ips) (link is taken from the official LaMa repo). Use **LaMa_models.zip** for *big-lama*, *lama-places*, *lama-celeba*, etc. **big-lama.zip** if you need to convert *big-lama* only. Alternatively, you can use your own ckpt and *best.ckpt* and *models/best.ckpt* files. Just point the script to a folder with 'config.yaml' and 'models/best.ckpt'. See **Customize script** section for details.
+
+The script does not require *IOPanit* (marked as archived) for the conversion.
 
 ### Instructions
 
