@@ -32,21 +32,18 @@ sys.path.append(lama_repository_path)
 from saicinpainting.training.trainers import load_checkpoint
 
 class LaMaInferenceWrapper(torch.nn.Module):
-    def __init__(self, model, out_key='inpainted'):
+    def __init__(self, generator):
         super().__init__()
-        self.model = model
-        self.out_key = out_key
-        
+        self.generator = generator
+
     def forward(self, image_0_255, mask_0_255):
-        image_normalized = image_0_255 / 255.0
-        binary_mask = ((mask_0_255 > 0) * 1).byte().float()
-        batch = {
-            'image': image_normalized,
-            'mask': binary_mask
-        }
-        output_dict = self.model(batch)
-        output = output_dict[self.out_key]
-        return torch.clamp(output * 255, min=0, max=255)
+        image = image_0_255 / 255.0
+        mask = (mask_0_255 > 0).float()
+        masked_img = image * (1 - mask)
+        input_tensor = torch.cat([masked_img, mask], dim=1)
+        prediction = self.generator(input_tensor)
+        result = image * (1 - mask) + prediction * mask
+        return torch.clamp(result * 255.0, 0, 255)
 
 def load_lama_model(model_dir):
     config_path = f"{model_dir}/config.yaml"
@@ -139,7 +136,14 @@ def convert_to_coreml(traced_model, coreml_image, coreml_mask):
 
 print("Loading model...")
 model = load_lama_model(lama_pretrained_models_path)
-wrapper = LaMaInferenceWrapper(model)
+if hasattr(model, "generator"):
+    base_model = model.generator
+elif hasattr(model, "model"):
+    base_model = model.model
+else:
+    raise RuntimeError("Cannot find generator inside Lightning module")
+
+wrapper = LaMaInferenceWrapper(base_model)
 wrapper.eval()
 print("Tracing model...")
 traced_model, coreml_image, coreml_mask = prepare_for_coreml_conversion(wrapper)
